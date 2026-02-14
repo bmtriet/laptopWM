@@ -340,9 +340,9 @@ function render() {
 
 function drawGlassFooterOnCanvas() {
     const margin = 24;
-    const padding = 24;
+    const padding = 28;
     const w = canvas.width - margin * 2;
-    const h = 160; // Increased height for better spacing
+    const h = 185; // Increased height for better balance
     const x = margin;
     const y = canvas.height - margin - h;
     const radius = 12;
@@ -365,7 +365,7 @@ function drawGlassFooterOnCanvas() {
     // Backdrop Blur Trick
     ctx.save();
     ctx.clip();
-    ctx.filter = 'blur(20px)';
+    ctx.filter = 'blur(25px)';
     drawBackground();
     if (pastedImage) {
         const size = parseInt(inputs.imageSize.value);
@@ -381,42 +381,45 @@ function drawGlassFooterOnCanvas() {
     ctx.restore();
 
     // Glass Overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'; // Slightly darker for better readability
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // Slightly darker for larger text
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Laptop Model (Header)
     ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-    ctx.font = '700 24px Outfit, sans-serif';
-    ctx.fillText(parsedSpecs.laptop_model || "Laptop Model", x + padding, y + padding + 15);
+    ctx.font = '700 32px Outfit, sans-serif';
+    ctx.fillText(parsedSpecs.laptop_model || "Laptop Model", x + padding, y + padding + 25);
 
     // Divider
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.beginPath();
-    ctx.moveTo(x + padding, y + padding + 35);
-    ctx.lineTo(x + w - padding, y + padding + 35);
+    ctx.moveTo(x + padding, y + padding + 52);
+    ctx.lineTo(x + w - padding, y + padding + 52);
     ctx.stroke();
 
-    // Specs Grid
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = '400 16px Inter, sans-serif';
+    // Specs Grid - 3 columns with balanced spacing
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.font = '500 21px Inter, sans-serif';
 
-    const gridY = y + padding + 65;
-    // Left col
-    ctx.fillText(parsedSpecs.cpu || "", x + padding, gridY);
-    ctx.fillText(parsedSpecs.ram || "", x + padding, gridY + 32);
+    const gridY = y + padding + 95;
+    const availableWidth = w - padding * 2;
+    const rowGap = 42;
 
-    // Right col
-    const col2X = x + w / 2 + padding;
+    // Column 1: CPU & RAM (left aligned)
+    const col1X = x + padding;
+    ctx.fillText(parsedSpecs.cpu || "", col1X, gridY);
+    ctx.fillText(parsedSpecs.ram || "", col1X, gridY + rowGap);
+
+    // Column 2: GPU & SSD (center)
+    const col2X = x + padding + availableWidth * 0.35;
     ctx.fillText(parsedSpecs.gpu || "", col2X, gridY);
-    ctx.fillText(parsedSpecs.ssd || "", col2X, gridY + 32);
+    ctx.fillText(parsedSpecs.ssd || "", col2X, gridY + rowGap);
 
-    // Monitor Size (Footer)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.font = '400 14px Inter, sans-serif';
-    ctx.fillText(parsedSpecs.monitor_size || "", x + padding, y + h - padding + 5);
+    // Column 3: Monitor Size (right side, centered vertically)
+    const col3X = x + padding + availableWidth * 0.7;
+    ctx.fillText(parsedSpecs.monitor_size || "", col3X, gridY + rowGap / 2);
 
     ctx.restore();
 }
