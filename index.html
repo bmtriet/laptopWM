@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeCanvas - Luxury Image Clipper</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="luxury-dark">
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar glass">
+            <div class="brand">
+                <h1 class="glow-text">VIBE<span>CANVAS</span></h1>
+                <p class="subtitle">Luxury Image Studio</p>
+            </div>
+
+            <div class="control-group">
+                <label>Canvas Size</label>
+                <div class="input-row">
+                    <div class="input-field">
+                        <span>W</span>
+                        <input type="number" id="canvasWidth" value="900" step="10">
+                    </div>
+                    <div class="input-field">
+                        <span>H</span>
+                        <input type="number" id="canvasHeight" value="1080" step="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Image Size</label>
+                <input type="range" id="imageSize" min="100" max="1000" value="798">
+                <div class="range-value"><span id="imageSizeValue">798</span>px</div>
+            </div>
+
+            <div class="control-group">
+                <label>Corner Radius</label>
+                <input type="range" id="borderRadius" min="0" max="200" value="45">
+                <div class="range-value"><span id="borderRadiusValue">45</span>px</div>
+            </div>
+
+            <div class="control-group">
+                <label>Neon Glow</label>
+                <div class="glow-controls">
+                    <input type="color" id="shadowColor" value="#ff0080">
+                    <div class="slider-wrapper">
+                        <input type="range" id="shadowStrength" min="0" max="100" value="55">
+                    </div>
+                </div>
+                <div class="range-value">Strength: <span id="shadowStrengthValue">55</span></div>
+            </div>
+
+            <div class="control-group">
+                <label>Device Specs (JSON)</label>
+                <div class="json-input-wrapper">
+                    <textarea id="specJSON" spellcheck="false" placeholder='{
+  "laptop_model": "ThinkPad P17 Gen 2",
+  "cpu": "Intel Core i9-11950H",
+  "gpu": "NVIDIA RTX A5000 16GB",
+  "ssd": "1TB NVMe",
+  "ram": "32GB DDR4",
+  "monitor_size": "17.3 inch 4K UHD"
+}'></textarea>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="downloadBtn" class="btn-primary">
+                    <i data-lucide="download"></i> Download Piece
+                </button>
+            </div>
+            
+            <div class="instructions glass">
+                <p>Press <strong>Ctrl + V</strong> to paste image</p>
+                <p>Drag image to reposition</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <div class="canvas-wrapper">
+                <canvas id="mainCanvas"></canvas>
+                <div id="pasteOverlay" class="paste-overlay">
+                    <div class="overlay-content">
+                        <div class="icon-pulse">
+                            <i data-lucide="image-plus" size="48"></i>
+                        </div>
+                        <h2>PASTE IMAGE</h2>
+                        <p>Ctrl + V to begin creation</p>
+                    </div>
+                </div>
+                <!-- Glass Footer is now drawn directly on canvas -->
+                <div id="canvasFooter" class="canvas-footer glass-footer" style="display: none;">
+                    <div class="footer-specs-grid">
+                        <div class="spec-item"><i data-lucide="cpu"></i> <span id="displayCPU"></span></div>
+                        <div class="spec-item"><i data-lucide="monitor"></i> <span id="displayGPU"></span></div>
+                        <div class="spec-item"><i data-lucide="cpu"></i> <span id="displayRAM"></span></div>
+                        <div class="spec-item"><i data-lucide="hard-drive"></i> <span id="displaySSD"></span></div>
+                        <div class="spec-item col-span-2"><i data-lucide="tv"></i> <span id="displayDisplay"></span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+</body>
+</html>
