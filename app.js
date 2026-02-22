@@ -28,6 +28,7 @@ const specDisplays = {
     ram: document.getElementById('displayRAM'),
     ssd: document.getElementById('displaySSD'),
     display: document.getElementById('displayDisplay'),
+    fbid: document.getElementById('displayFBID'),
 };
 
 // Internal Spec State
@@ -37,7 +38,8 @@ let parsedSpecs = {
     gpu: "",
     ssd: "",
     ram: "",
-    monitor_size: ""
+    monitor_size: "",
+    fbid: ""
 };
 
 // State
@@ -107,6 +109,7 @@ function updateFooterDisplay() {
         if (specDisplays.ram) specDisplays.ram.innerText = parsedSpecs.ram || "";
         if (specDisplays.ssd) specDisplays.ssd.innerText = parsedSpecs.ssd || "";
         if (specDisplays.display) specDisplays.display.innerText = parsedSpecs.monitor_size || "";
+        if (specDisplays.fbid) specDisplays.fbid.innerText = parsedSpecs.fbid || "";
     } catch (e) {
         // Silently fail or log for debug
     }
@@ -144,14 +147,32 @@ function loadSettings() {
         if (settings.specJSON) {
             specInputs.json.value = settings.specJSON;
         } else {
-            specInputs.json.value = "";
+            specInputs.json.value = `{
+  "laptop_model": "Lenovo ThinkPad X1 Extreme Gen 3",
+  "cpu": "Intel Core i7-10750H",
+  "gpu": "NVIDIA RTX 1650Ti Max-Q",
+  "ssd": "512GB NVMe",
+  "monitor_size": "15.6\\" Full HD",
+  "ram": "16GB DDR4",
+  "price": "16.000.000 VND",
+  "fbid": "122170759358625322"
+}`;
         }
 
         resizeCanvas();
         updateLabels();
         updateFooterDisplay();
     } else {
-        specInputs.json.value = "";
+        specInputs.json.value = `{
+  "laptop_model": "Lenovo ThinkPad X1 Extreme Gen 3",
+  "cpu": "Intel Core i7-10750H",
+  "gpu": "NVIDIA RTX 1650Ti Max-Q",
+  "ssd": "512GB NVMe",
+  "monitor_size": "15.6\\" Full HD",
+  "ram": "16GB DDR4",
+  "price": "16.000.000 VND",
+  "fbid": "122170759358625322"
+}`;
         updateFooterDisplay();
     }
 }
@@ -346,11 +367,70 @@ function render() {
     updateFooterDisplay();
 }
 
+function drawSpecIcon(type, x, y, size = 20) {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    const cx = x + size / 2;
+    const cy = y - size / 2 + 5; // Adjustment for baseline
+
+    if (type === 'cpu') {
+        const s = size * 0.7;
+        ctx.rect(cx - s / 2, cy - s / 2, s, s);
+        // Pins
+        for (let i = -1; i <= 1; i++) {
+            ctx.moveTo(cx - s / 2 - 3, cy + i * 4); ctx.lineTo(cx - s / 2, cy + i * 4);
+            ctx.moveTo(cx + s / 2, cy + i * 4); ctx.lineTo(cx + s / 2 + 3, cy + i * 4);
+            ctx.moveTo(cx + i * 4, cy - s / 2 - 3); ctx.lineTo(cx + i * 4, cy - s / 2);
+            ctx.moveTo(cx + i * 4, cy + s / 2); ctx.lineTo(cx + i * 4, cy + s / 2 + 3);
+        }
+    } else if (type === 'ram') {
+        const w = size * 0.9;
+        const h = size * 0.4;
+        ctx.rect(cx - w / 2, cy - h / 2, w, h);
+        for (let i = -2; i <= 2; i++) {
+            ctx.moveTo(cx + i * 3, cy + h / 2); ctx.lineTo(cx + i * 3, cy + h / 2 - 3);
+        }
+    } else if (type === 'gpu') {
+        const w = size * 0.9;
+        const h = size * 0.5;
+        ctx.rect(cx - w / 2, cy - h / 2, w, h);
+        ctx.arc(cx - 2, cy, h * 0.3, 0, Math.PI * 2);
+        ctx.moveTo(cx + 4, cy - 2); ctx.lineTo(cx + 8, cy - 2);
+        ctx.moveTo(cx + 4, cy + 2); ctx.lineTo(cx + 8, cy + 2);
+    } else if (type === 'ssd') {
+        const w = size * 0.4;
+        const h = size * 0.9;
+        ctx.rect(cx - w / 2, cy - h / 2, w, h);
+        ctx.moveTo(cx - w / 2, cy - h / 2 + 4); ctx.lineTo(cx + w / 2, cy - h / 2 + 4);
+        ctx.moveTo(cx - 1, cy + 4); ctx.lineTo(cx - 1, cy + 8);
+        ctx.moveTo(cx + 1, cy + 4); ctx.lineTo(cx + 1, cy + 8);
+    } else if (type === 'display') {
+        const w = size * 0.9;
+        const h = size * 0.6;
+        ctx.rect(cx - w / 2, cy - h / 2 - 2, w, h);
+        ctx.moveTo(cx - 4, cy + h / 2 + 2); ctx.lineTo(cx + 4, cy + h / 2 + 2);
+        ctx.moveTo(cx, cy + h / 2 - 2); ctx.lineTo(cx, cy + h / 2 + 2);
+    } else if (type === 'fbid') {
+        const s = size * 0.8;
+        ctx.arc(cx, cy, s / 2, 0, Math.PI * 2);
+        // Simplified 'f'
+        ctx.moveTo(cx + 2, cy + 4); ctx.lineTo(cx + 2, cy - 2);
+        ctx.quadraticCurveTo(cx + 2, cy - 4, cx, cy - 4);
+        ctx.moveTo(cx - 1, cy - 1); ctx.lineTo(cx + 4, cy - 1);
+    }
+
+    ctx.stroke();
+}
+
 function drawGlassFooterOnCanvas() {
     const margin = 24;
     const padding = 28;
     const w = canvas.width - margin * 2;
-    const h = 185; // Increased height for better balance
+    const h = 200; // Adjusted for more info
     const x = margin;
     const y = canvas.height - margin - h;
     const radius = 12;
@@ -376,15 +456,15 @@ function drawGlassFooterOnCanvas() {
     ctx.filter = 'blur(25px)';
     drawBackground();
     if (pastedImage) {
-        const { w, h } = getPastedImageBounds();
-        const px = imgPos.x - w / 2;
-        const py = imgPos.y - h / 2;
-        ctx.drawImage(pastedImage, px, py, w, h);
+        const { w: imgW, h: imgH } = getPastedImageBounds();
+        const px = imgPos.x - imgW / 2;
+        const py = imgPos.y - imgH / 2;
+        ctx.drawImage(pastedImage, px, py, imgW, imgH);
     }
     ctx.restore();
 
     // Glass Overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; // Slightly darker for larger text
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
     ctx.fill();
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.lineWidth = 1.5;
@@ -402,27 +482,38 @@ function drawGlassFooterOnCanvas() {
     ctx.lineTo(x + w - padding, y + padding + 52);
     ctx.stroke();
 
-    // Specs Grid - 3 columns with balanced spacing
+    // Specs Grid
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.font = '500 21px Inter, sans-serif';
+    ctx.font = '500 19px Inter, sans-serif'; // Slightly smaller to fit icons nicely
 
     const gridY = y + padding + 95;
     const availableWidth = w - padding * 2;
-    const rowGap = 42;
+    const rowGap = 50;
+    const iconOffset = 30;
 
-    // Column 1: CPU & RAM (left aligned)
+    // Column 1: CPU & RAM
     const col1X = x + padding;
-    ctx.fillText(parsedSpecs.cpu || "", col1X, gridY);
-    ctx.fillText(parsedSpecs.ram || "", col1X, gridY + rowGap);
+    drawSpecIcon('cpu', col1X, gridY);
+    ctx.fillText(parsedSpecs.cpu || "CPU", col1X + iconOffset, gridY);
 
-    // Column 2: GPU & SSD (center)
+    drawSpecIcon('ram', col1X, gridY + rowGap);
+    ctx.fillText(parsedSpecs.ram || "RAM", col1X + iconOffset, gridY + rowGap);
+
+    // Column 2: GPU & SSD
     const col2X = x + padding + availableWidth * 0.35;
-    ctx.fillText(parsedSpecs.gpu || "", col2X, gridY);
-    ctx.fillText(parsedSpecs.ssd || "", col2X, gridY + rowGap);
+    drawSpecIcon('gpu', col2X, gridY);
+    ctx.fillText(parsedSpecs.gpu || "GPU", col2X + iconOffset, gridY);
 
-    // Column 3: Monitor Size (right side, centered vertically)
+    drawSpecIcon('ssd', col2X, gridY + rowGap);
+    ctx.fillText(parsedSpecs.ssd || "SSD", col2X + iconOffset, gridY + rowGap);
+
+    // Column 3: Monitor Size & FBID
     const col3X = x + padding + availableWidth * 0.7;
-    ctx.fillText(parsedSpecs.monitor_size || "", col3X, gridY + rowGap / 2);
+    drawSpecIcon('display', col3X, gridY);
+    ctx.fillText(parsedSpecs.monitor_size || "Monitor", col3X + iconOffset, gridY);
+
+    drawSpecIcon('fbid', col3X, gridY + rowGap);
+    ctx.fillText(parsedSpecs.fbid || "FBID", col3X + iconOffset, gridY + rowGap);
 
     ctx.restore();
 }
