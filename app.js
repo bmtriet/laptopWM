@@ -32,12 +32,12 @@ const specDisplays = {
 
 // Internal Spec State
 let parsedSpecs = {
-    laptop_model: "ThinkPad P17 Gen 2",
-    cpu: "Intel Core i9-11950H",
-    gpu: "NVIDIA RTX A5000 16GB",
-    ssd: "1TB NVMe",
-    ram: "32GB DDR4",
-    monitor_size: "17.3 inch 4K UHD"
+    laptop_model: "",
+    cpu: "",
+    gpu: "",
+    ssd: "",
+    ram: "",
+    monitor_size: ""
 };
 
 // State
@@ -144,16 +144,14 @@ function loadSettings() {
         if (settings.specJSON) {
             specInputs.json.value = settings.specJSON;
         } else {
-            // Default placeholder if none saved
-            specInputs.json.value = JSON.stringify(parsedSpecs, null, 2);
+            specInputs.json.value = "";
         }
 
         resizeCanvas();
         updateLabels();
         updateFooterDisplay();
     } else {
-        // Set default JSON if no settings
-        specInputs.json.value = JSON.stringify(parsedSpecs, null, 2);
+        specInputs.json.value = "";
         updateFooterDisplay();
     }
 }
@@ -218,9 +216,9 @@ function startDrag(e) {
     }
 
     if (pastedImage) {
-        const size = parseInt(inputs.imageSize.value);
-        if (mouseX >= imgPos.x - size / 2 && mouseX <= imgPos.x + size / 2 &&
-            mouseY >= imgPos.y - size / 2 && mouseY <= imgPos.y + size / 2) {
+        const { w, h } = getPastedImageBounds();
+        if (mouseX >= imgPos.x - w / 2 && mouseX <= imgPos.x + w / 2 &&
+            mouseY >= imgPos.y - h / 2 && mouseY <= imgPos.y + h / 2) {
             isDragging = true;
             dragOffset.x = mouseX - imgPos.x;
             dragOffset.y = mouseY - imgPos.y;
@@ -281,12 +279,27 @@ function drawBackground() {
     }
 }
 
+function getPastedImageBounds() {
+    if (!pastedImage) return { w: 0, h: 0 };
+    const size = parseInt(inputs.imageSize.value);
+    const aspect = pastedImage.width / pastedImage.height;
+    let w, h;
+    if (aspect > 1) {
+        w = size;
+        h = size / aspect;
+    } else {
+        h = size;
+        w = size * aspect;
+    }
+    return { w, h };
+}
+
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
 
     if (pastedImage) {
-        const size = parseInt(inputs.imageSize.value);
+        const { w, h } = getPastedImageBounds();
         const radius = parseInt(inputs.borderRadius.value);
         const shadowCol = inputs.shadowColor.value;
         const shadowStr = parseInt(inputs.shadowStrength.value);
@@ -298,28 +311,23 @@ function render() {
         }
 
         ctx.beginPath();
-        const x = imgPos.x - size / 2;
-        const y = imgPos.y - size / 2;
+        const x = imgPos.x - w / 2;
+        const y = imgPos.y - h / 2;
 
         ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + size - radius, y);
-        ctx.quadraticCurveTo(x + size, y, x + size, y + radius);
-        ctx.lineTo(x + size, y + size - radius);
-        ctx.quadraticCurveTo(x + size, y + size, x + size - radius, y + size);
-        ctx.lineTo(x + radius, y + size);
-        ctx.quadraticCurveTo(x, y + size, x, y + size - radius);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
         ctx.lineTo(x, y + radius);
         ctx.quadraticCurveTo(x, y, x + radius, y);
         ctx.closePath();
 
         ctx.save();
         ctx.clip();
-        const s_iw = pastedImage.width;
-        const s_ih = pastedImage.height;
-        const s_ratio = Math.max(size / s_iw, size / s_ih);
-        const s_nw = s_iw * s_ratio;
-        const s_nh = s_ih * s_ratio;
-        ctx.drawImage(pastedImage, x + (size - s_nw) / 2, y + (size - s_nh) / 2, s_nw, s_nh);
+        ctx.drawImage(pastedImage, x, y, w, h);
         ctx.restore();
         ctx.restore();
     }
@@ -368,15 +376,10 @@ function drawGlassFooterOnCanvas() {
     ctx.filter = 'blur(25px)';
     drawBackground();
     if (pastedImage) {
-        const size = parseInt(inputs.imageSize.value);
-        const px = imgPos.x - size / 2;
-        const py = imgPos.y - size / 2;
-        const s_iw = pastedImage.width;
-        const s_ih = pastedImage.height;
-        const s_ratio = Math.max(size / s_iw, size / s_ih);
-        const s_nw = s_iw * s_ratio;
-        const s_nh = s_ih * s_ratio;
-        ctx.drawImage(pastedImage, px + (size - s_nw) / 2, py + (size - s_nh) / 2, s_nw, s_nh);
+        const { w, h } = getPastedImageBounds();
+        const px = imgPos.x - w / 2;
+        const py = imgPos.y - h / 2;
+        ctx.drawImage(pastedImage, px, py, w, h);
     }
     ctx.restore();
 
